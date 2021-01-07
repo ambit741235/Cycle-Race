@@ -5,7 +5,7 @@ var pinkCG, yellowCG, redCG, cycleBell, oppPink1Img, oppYellow1Img, oppRed1Img, 
 
 var player1, player2, player3;
 
-var gameOver, gameOverImg;
+var gameOver, gameOverImg, restart, restartButton;
 
 var obstacles, obstaclesGroup;
 
@@ -37,24 +37,31 @@ function preload(){
   obstacles1 = loadImage("images/obstacle1.png");
   obstacles2 = loadImage("images/obstacle2.png");
   obstacles3 = loadImage("images/obstacle3.png");
+
+  restartButton = loadImage("images/restart.png");
 }
 
 function setup(){
-  createCanvas(1200,300);
+  createCanvas(windowWidth,windowHeight);
   
   // Moving background
-  path=createSprite(100,150);
+  path=createSprite(width/2,/*200*/height/2);
   path.addImage(pathImg);
   path.velocityX = -(6 + 2 * distance/150);
   
   //creating boy running
-  mainCyclist  = createSprite(70,150,20,20);
+  mainCyclist  = createSprite(width/2,height-20,20,20);
   mainCyclist.addAnimation("SahilRunning",mainRacerImg1);
   mainCyclist.scale=0.07;
   
-  gameOver = createSprite(600,150,10,10);
+  gameOver = createSprite(width/2,height/2,10,10);
   gameOver.addImage(gameOverImg);
   gameOver.visible = false;
+
+  restart = createSprite(width/2,(height/2)+65,10,10);
+  restart.addImage(restartButton);
+  restart.scale = 0.07;
+  restart.visible = false;
   
   pinkCG = createGroup();
   yellowCG = createGroup();
@@ -75,7 +82,7 @@ function draw() {
     mainCyclist.y = World.mouseY;
   
     edges= createEdgeSprites();
-    mainCyclist .collide(edges);
+    mainCyclist.collide(edges);
     
     var select_oppPlayer = Math.round(random(1,3));
     if(frameCount % 150 == 0){
@@ -124,9 +131,11 @@ function draw() {
     
   }else if(gameState === END){
     gameOver.visible = true;
+    restart.visible = true;
     textSize(20);
     fill(255);
-    text("Press Up Arrow to Restart the game!",450,200);
+    text("Press Up Arrow to Restart the game!",(width/2)-140,/*height-200*/(height/2)-(-35));
+    text("Or, Press Restart Button to Restart the game!",(width/2)-200,(height/2)-(-50));
     
     path.velocityX = 0;
     mainCyclist.velocityX = 0;
@@ -144,14 +153,20 @@ function draw() {
     obstaclesGroup.setVelocityXEach(0);
     obstaclesGroup.setLifetimeEach(-1);
     
-    if(keyDown("UP_ARROW")){
+    if(keyDown("UP_ARROW") || mousePressedOver(restart)){
       reset();
+    }
+    if (touches.length > 0) {
+      if (restart.overlapPoint(touches[0].x, touches[0].y)) {
+        reset();
+        touches = []
+      }
     }
   }
 }
 
 function pinkCyclists(){
-  player1 = createSprite(1100,Math.round(random(50,250)),10,10);
+  player1 = createSprite(1100,Math.round(random(50,width-50)),10,10);
   player1.scale = 0.06;
   player1.velocityX = -(6 + 2 * distance/150);
   player1.addAnimation("opponentPlayer1",oppPink1Img);
@@ -160,7 +175,7 @@ function pinkCyclists(){
 }
 
 function yellowCyclists(){
-  player2 = createSprite(1100,Math.round(random(50,250)),10,10);
+  player2 = createSprite(1100,Math.round(random(50,width-50)),10,10);
   player2.scale = 0.06;
   player2.velocityX = -(6 + 2 * distance/150);
   player2.addAnimation("opponentPlayer2",oppYellow1Img);
@@ -169,7 +184,7 @@ function yellowCyclists(){
 }
 
 function redCyclists(){
-  player3 = createSprite(1100,Math.round(random(50,250)),10,10);
+  player3 = createSprite(1100,Math.round(random(50,width-50)),10,10);
   player3.scale = 0.06;
   player3.velocityX = -(6 + 2 * distance/150);
   player3.addAnimation("opponentPlayer3",oppRed1Img);
@@ -180,6 +195,7 @@ function redCyclists(){
 function reset(){
   gameState = PLAY;
   gameOver.visible = false;
+  restart.visible = false;
   
   pinkCG.destroyEach();
   yellowCG.destroyEach();
@@ -195,7 +211,7 @@ function reset(){
 
 function spawnObstacles(){
   if(frameCount % 60 == 0){
-    obstacles = createSprite(1100,Math.round(random(50,250)),10,10);
+    obstacles = createSprite(1100,Math.round(random(50,width-50)),10,10);
     obstacles.velocityX = -(6 + 2 * distance/150);
     obstacles.scale = 0.1;
     var rand = Math.round(random(1,3));
@@ -210,6 +226,9 @@ function spawnObstacles(){
     }
     obstacles.depth = gameOver.depth;
     gameOver.depth = gameOver.depth + 1;
+
+    obstacles.depth = restart.depth;
+    restart.depth = restart.depth + 1;
     obstaclesGroup.add(obstacles);
   }
 }
