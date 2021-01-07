@@ -75,7 +75,7 @@ function draw() {
   drawSprites();
   textSize(20);
   fill(255);
-  text("Distance: "+ distance,350,30);
+  text("Distance: "+ distance,/*350,30*/width/2,30);
   
   if(gameState===PLAY){
     distance = distance + Math.round(getFrameRate()/50);
